@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+    container_name: postgres
+    restart: always
+    command: -c wal_level=logical
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: "/var/lib/postgresql/data/pg_data"
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data":rw
+    ports:
+      - "5432:5432"
+    networks:
+      - sakila_net
+
+  # https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+  pgadmin4:
+    image: dpage/pgadmin4:9
+    restart: always
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "5050:5050"
+    networks:
+      - sakila_net
+
+networks:
+  sakila_net:
+    name: sakila_net
+    external: true
