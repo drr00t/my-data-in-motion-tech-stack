@@ -1,0 +1,7 @@
+plugins/
+
+minio-data/
+
+pg_data/
+
+*.bkp
