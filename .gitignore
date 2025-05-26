@@ -5,3 +5,8 @@ minio-data/
 pg_data/
 
 *.bkp
+
+credentials.*
+.idea/
+
+target/

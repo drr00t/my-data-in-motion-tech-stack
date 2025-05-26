@@ -21,3 +21,8 @@ scylladb
 
 - https://docs.scylladb.com/manual/stable/using-scylla/integrations/integration-kafka.html
 
+
+### remove slots de replicação
+select * from pg_drop_replication_slot('debezium');
+
+SELECT * FROM pg_replication_slots;

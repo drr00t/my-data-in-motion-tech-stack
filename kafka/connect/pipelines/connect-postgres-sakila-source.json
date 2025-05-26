@@ -1,15 +1,14 @@
 {
-  "name": "sakila-connector",
+  "name": "sakila-connector-source",
   "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
     "database.hostname": "postgres",
     "database.port": "5432",
     "database.user": "postgres",
     "database.password": "postgres",
-    "database.dbname": "postgres",
+    "database.dbname": "sakila",
     "plugin.name": "pgoutput",
-    "topic.prefix": "sakila-",
-    "schema.include.list": "public",
-    "table.include.list": "public.actor"
+    "topic.prefix": "sakila",
+    "table.include.list": "public.actor, public.film, public.category"
   }
 }
