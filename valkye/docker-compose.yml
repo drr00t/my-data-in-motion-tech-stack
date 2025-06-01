@@ -1,0 +1,25 @@
+services:
+  valkye:
+    image: valkey/valkey:8
+    #    deploy:
+    #      resources:
+    #        limits:
+    #          cpus: "1"
+    #          memory: 2G
+    container_name: valkye-server
+    restart: always
+    #command: "/usr/local/etc/valkey/valkey.conf"
+    environment:
+      VALKEY_EXTRA_FLAGS: "--save 60 1 --loglevel warning"
+    volumes:
+      - ./vlk_data:/data":rw
+      - ./config:/usr/local/etc/valkey:ro
+    ports:
+      - "6379:6379"
+    networks:
+      - sakila_net
+
+networks:
+  sakila_net:
+    name: sakila_net
+    external: true
