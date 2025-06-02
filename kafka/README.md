@@ -1,11 +1,13 @@
 # Plugins that I'm currently using in my experiments
 
+> Download and unpack the used plugins in the kafka/connect/plugins folder.
+
 ## Plugins for download
 
 https://iceberg.apache.org/docs/nightly/kafka-connect/
 https://iceberg.apache.org/docs/1.8.1/kafka-connect/#features
 
-Kafka COnnect Hub confluent
+Kafka Connect Hub confluent
 - https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc
 - https://www.confluent.io/hub/confluentinc/kafka-connect-s3
 - https://www.confluent.io/hub/tabular/iceberg-kafka-connect
@@ -13,7 +15,7 @@ Kafka COnnect Hub confluent
 Debezium Plugins
 https://debezium.io/documentation/reference/3.1/install.html
 
-Neo4j não há dependências 
+Neo4j 
 - https://github.com/neo4j/neo4j-kafka-connector/releases/tag/5.1.11
 
 
