@@ -9,6 +9,6 @@
     "database.dbname": "sakila",
     "plugin.name": "pgoutput",
     "topic.prefix": "sakila",
-    "table.include.list": "public.actor, public.film, public.category"
+    "table.include.list": "public.actor, public.film, public.category, public.film_actor, public.film_category"
   }
 }

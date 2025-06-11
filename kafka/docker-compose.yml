@@ -6,6 +6,7 @@ services:
     container_name: broker
     hostname: broker
     environment:
+      CLUSTER_ID: "q1w2e3r4t5y6u7i8o9p0zxcvbnmlkjhgfdsa"
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://broker:9093,PLAINTEXT_HOST://0.0.0.0:29092
@@ -17,7 +18,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_NUM_PARTITIONS: 10
     ports:
       - 9092:9092
       - 29092:29092

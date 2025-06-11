@@ -28,3 +28,8 @@ scylladb
 select * from pg_drop_replication_slot('debezium');
 
 SELECT * FROM pg_replication_slots;
+
+##
+
+curl -X POST http://localhost:8083/connectors -H 'Content-Type: application/json' -d @connect/pipelines/connect-postgres-sakila-source.json | jq
+

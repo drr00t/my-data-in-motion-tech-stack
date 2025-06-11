@@ -1,33 +1,49 @@
 package io.github.drr00t;
 
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.kafka.common.serialization.*;
 import org.apache.kafka.streams.*;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
-import org.apache.kafka.streams.state.VersionedKeyValueStore;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
 import java.util.Properties;
 
 @SpringBootTest
 @EmbeddedKafka(ports = {9095})
-public class AppTest {
+public class TopologyStreamTest {
 
     @Test
-    @DisplayName("StreamBuilder message forwarded")
+    @DisplayName("Hello wrod topology")
     void givenInputMessages_whenProcessed_thenMessagesAreForwarded() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
-        KStream<String,String> wordCountProcessor = streamsBuilder.stream("input-topic");
-        wordCountProcessor.to("output-topic");
+
+        // serdes
+        // json Serde
+        final Serializer<JsonNode> jsonSerializer = new JsonSerializer<>();
+        final Deserializer<JsonNode> jsonDeserializer = new JsonDeserializer<>();
+        final Serde<JsonNode> jsonSerde = Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
+
+
+        //source stream
+        KStream<String,String> wordCountSource = streamsBuilder
+                .stream("input-topic", Consumed.with(Serdes.String(),Serdes.String()));
+
+        //processor stream
+        KStream<String,String> wordCountProcessor = wordCountSource
+                .mapValues( value -> value.toUpperCase());
+
+        //sink processor
+        wordCountSource.to("output-topic", Produced.with(Serdes.String(),Serdes.String()));
+
         Topology topology = streamsBuilder.build();
+
         var props = new Properties();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9095");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());

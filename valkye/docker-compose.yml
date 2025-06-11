@@ -1,16 +1,15 @@
 services:
   valkye:
-    image: valkey/valkey:8
+    image: valkey/valkey-extensions:8
     deploy:
       resources:
         limits:
           #          cpus: "1"
-          memory: 2G
+          memory: 3G
     container_name: valkye-server
+    hostname: valkye-server
     restart: always
     command: "valkey-server /usr/local/etc/valkey/valkey.conf"
-    # environment:
-    # - VALKEY_EXTRA_FLAGS="--loglevel warning"
     volumes:
       - ./vlk_data:/data":rw
       - ./config:/usr/local/etc/valkey:ro
@@ -19,6 +18,18 @@ services:
 
     networks:
       - sakila_net
+
+  #  redisinsight:
+  #    container_name: redisinsight
+  #    hostname: redisinsight
+  #    image: redis/redisinsight:latest
+  #    restart: always
+  #    environment:
+  #      - REDIS_HOSTS=valkye-server
+  #    ports:
+  #      - "5540:5540"
+  #    networks:
+  #      - sakila_net
 
   redis-commander:
     container_name: redis-commander

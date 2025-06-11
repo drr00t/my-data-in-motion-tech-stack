@@ -10,3 +10,5 @@ credentials.*
 .idea/
 
 target/
+
+.vscode
