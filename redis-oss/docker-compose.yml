@@ -1,0 +1,49 @@
+services:
+  redis:
+    image: redis:8
+    deploy:
+      resources:
+        limits:
+          #          cpus: "1"
+          memory: 3G
+    container_name: redis-server
+    hostname: redis-server
+    restart: always
+    command: "redis-server /usr/local/etc/redis/redis.conf"
+    volumes:
+      - ./rds_data:/data":rw
+      - ./config:/usr/local/etc/redis:ro
+    ports:
+      - "6379:6379"
+
+    networks:
+      - sakila_net
+
+  #  redisinsight:
+  #    container_name: redisinsight
+  #    hostname: redisinsight
+  #    image: redis/redisinsight:latest
+  #    restart: always
+  #    environment:
+  #      - REDIS_HOSTS=valkye-server
+  #    ports:
+  #      - "5540:5540"
+  #    networks:
+  #      - sakila_net
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOSTS=redis-server:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - sakila_net
+
+networks:
+  sakila_net:
+    name: sakila_net
+    external: true
