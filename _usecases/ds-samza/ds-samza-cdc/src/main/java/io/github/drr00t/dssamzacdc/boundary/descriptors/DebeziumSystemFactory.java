@@ -34,9 +34,7 @@ public class DebeziumSystemFactory implements SystemFactory{
     @Override
     public SystemConsumer getConsumer(String systemName, Config config, MetricsRegistry registry, String consumerLabel) {
 
-        var debeziumCdcSystemConsumer = new DebeziumCdcSystemConsumer();
-        var debeziumConfig = DebeziumConfiguration.from(config);
-        return new DebeziumEngineConsumerProxy(systemName, debeziumConfig, debeziumCdcSystemConsumer);
+        return new DebeziumCdcSystemConsumer(systemName, registry, config);
     }
 
     @Override

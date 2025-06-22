@@ -1,16 +1,18 @@
 package io.github.drr00t;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.common.serialization.*;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.query.Query;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.VersionedKeyValueStore;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.internal.Bytes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
 import java.util.Properties;
@@ -20,15 +22,15 @@ import java.util.Properties;
 public class TopologyStreamTest {
 
     @Test
-    @DisplayName("Hello wrod topology")
+    @DisplayName("Hello word topology")
     void givenInputMessages_whenProcessed_thenMessagesAreForwarded() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
 
         // serdes
         // json Serde
-        final Serializer<JsonNode> jsonSerializer = new JsonSerializer<>();
-        final Deserializer<JsonNode> jsonDeserializer = new JsonDeserializer<>();
-        final Serde<JsonNode> jsonSerde = Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
+//        final Serializer<JsonNode> jsonSerializer = new JsonSerde<>() JsonSerializer<>();
+//        final Deserializer<JsonNode> jsonDeserializer = new JsonDeserializer<>();
+//        final Serde<JsonNode> jsonSerde = new JsonSerde<>(JsonNode.class);//Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
 
 
         //source stream
@@ -45,6 +47,7 @@ public class TopologyStreamTest {
         Topology topology = streamsBuilder.build();
 
         var props = new Properties();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "word-count-app");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9095");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -77,6 +80,7 @@ public class TopologyStreamTest {
 
         Topology topology = streamsBuilder.build();
         var props = new Properties();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "word-count-app");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9095");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -90,6 +94,41 @@ public class TopologyStreamTest {
 
             // Retrieve the local store and assert the latest value for the key
             ReadOnlyKeyValueStore<String,String> store = topologyTestDriver.getKeyValueStore("local-store");
+            try(var itr = store.all()){
+                while(itr.hasNext()){
+                    KeyValue<String, String> next = itr.next();
+                }
+            }
+
+            Assertions.assertThat(store.get("key")).isEqualTo("persisted value 1");
+        }
+    }
+
+    @Test
+    @DisplayName("Persist message into local store")
+    void givenInputmessages_whenMessagemBeenProcessed_thenVernedPersistIntoLocalStore(){
+        StreamsBuilder streamsBuilder = new StreamsBuilder();
+        // Create a state store
+        streamsBuilder.table("input-topic",
+                Consumed.with(Serdes.String(), Serdes.String()),
+                Materialized<String, String, KeyValueStore<Bytes, byte[]>>.as("local-store-versioned"));
+
+        Topology topology = streamsBuilder.build();
+        var props = new Properties();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "word-count-app-versioned");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9095");
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+
+        try (TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, props)) {
+            TestInputTopic<String, String> inputTopic = topologyTestDriver
+                    .createInputTopic("input-topic", new StringSerializer(), new StringSerializer());
+
+            inputTopic.pipeInput("key", "persisted value");
+            inputTopic.pipeInput("key", "persisted value 1");
+
+            // Retrieve the local store and assert the latest value for the key
+            VersionedKeyValueStore<String,String> store = topologyTestDriver.getVersionedKeyValueStore("local-store-versioned");
             try(var itr = store.all()){
                 while(itr.hasNext()){
                     KeyValue<String, String> next = itr.next();

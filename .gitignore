@@ -12,3 +12,7 @@ credentials.*
 target/
 
 .vscode
+
+.mvn
+
+state/
