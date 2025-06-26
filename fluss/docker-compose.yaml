@@ -1,0 +1,52 @@
+services:
+  coordinator:
+    image: fluss/fluss:0.7.0
+    hostname: coordinator-server
+    container_name: coordinator-server
+    command: ["coordinatorServer"]
+    #   resources:
+    #     limits:
+    #       cpus: '1.0'
+    #       memory: 1024M
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 512M
+    ports:
+      - "9123:9123"
+    environment:
+      FLUSS_PROPERTIES: |
+        zookeeper.address: zoo1:2181,zoo2:2182,zoo3:2183
+        bind.listeners: INTERNAL://coordinator-server:0, CLIENT://coordinator-server:9123
+        advertised.listeners: CLIENT://localhost:9123
+        internal.listener.name: INTERNAL
+    networks:
+      - sakila_net
+
+  tablet-server-0:
+    image: fluss/fluss:0.7.0
+    hostname: tablet-server-0
+    container_name: tablet-server-0
+    command: ["tabletServer"]
+    ports:
+      - "9124:9123"
+    volumes:
+      - ./fluss-data/0:/tmp/fluss
+      - ./fluss-remote-data/0:/tmp/fluss/remote-data
+    environment:
+      FLUSS_PROPERTIES: |
+        zookeeper.address: zoo1:2181,zoo2:2182,zoo3:2183
+        bind.listeners: INTERNAL://tablet-server-0:0, CLIENT://tablet-server-0:9123
+        advertised.listeners: CLIENT://localhost:9124
+        internal.listener.name: INTERNAL
+        tablet-server.id: 0
+        kv.snapshot.interval: 0s
+        data.dir: /tmp/fluss/data
+        remote.data.dir: /tmp/fluss/remote-data
+    networks:
+      - sakila_net
+
+
+networks:
+  sakila_net:
+    name: sakila_net
+    external: true
