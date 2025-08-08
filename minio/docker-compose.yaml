@@ -15,17 +15,6 @@ services:
     networks:
       - sakila_net
 
-  nessie:
-    container_name: nessie
-    hostname: nessie
-    image: projectnessie/nessie:0.18.0
-    ports:
-      - "19120:19120"
-    volumes:
-      - ./nessie-data:/data
-    networks:
-      - sakila_net
-
 networks:
   sakila_net:
     name: sakila_net

@@ -1,11 +1,6 @@
 services:
   redis:
     image: redis:8
-    deploy:
-      resources:
-        limits:
-          #          cpus: "1"
-          memory: 3G
     container_name: redis-server
     hostname: redis-server
     restart: always
@@ -17,7 +12,27 @@ services:
       - "6379:6379"
 
     networks:
-      - sakila_net
+      - eng_ops_net
+  
+  debezium-server:
+    image: debezium/server:3.0.0.Final
+    deploy:
+    container_name: debezium-server
+    hostname: debezium-server
+    restart: always
+    environment:
+      - DEBEZIUM_HOST=debezium-server
+      - DEBEZIUM_PORT=8083
+      - DEBEZIUM_REDIS_HOST=redis-server
+      - DEBEZIUM_REDIS_PORT=6379
+    volumes:
+      - ./config:/debezium/config:ro
+    ports:
+      - "8083:8083"
+    depends_on:
+      - redis
+    networks:
+      - eng_ops_net
 
   #  redisinsight:
   #    container_name: redisinsight
@@ -29,21 +44,24 @@ services:
   #    ports:
   #      - "5540:5540"
   #    networks:
-  #      - sakila_net
+  #      - eng_ops_net
 
   redis-commander:
     container_name: redis-commander
     hostname: redis-commander
     image: rediscommander/redis-commander:latest
     restart: always
+    depends_on:
+      - redis
     environment:
-      - REDIS_HOSTS=redis-server:6379
+      - REDIS_HOST=redis-server
+      - REDIS_PORT=6379
     ports:
       - "8081:8081"
     networks:
-      - sakila_net
+      - eng_ops_net
 
 networks:
-  sakila_net:
-    name: sakila_net
+  eng_ops_net:
+    name: eng_ops_net
     external: true

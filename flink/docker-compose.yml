@@ -3,15 +3,6 @@ services:
     image: flink:1.20-java17
     hostname: jobmanager
     command: ["jobmanager"]
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1024M
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-
     ports:
       - "8081:8081"
     environment:
@@ -23,14 +14,6 @@ services:
     image: flink:1.20-java17
     hostname: taskmanager
     command: ["taskmanager"]
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2048M
-        reservations:
-          cpus: '0.5'
-          memory: 1024M
     ports:
       - "6121:6121"
       - "6122:6122"
@@ -39,10 +22,12 @@ services:
       - jobmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - FLINK_PROPERTIES_jobmanager.rpc.address=jobmanager
+      - FLINK_PROPERTIES_jobmanager.rpc.port=6123
+      - FLINK_PROPERTIES_jobmanager.memory.process.size=1024m # Adjust memory as needed
     networks:
       - sakila_net
 
 networks:
   sakila_net:
     name: sakila_net
-    external: true
